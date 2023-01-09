@@ -6,7 +6,7 @@ const User = mongoose.model('emails')
 exports.handler = async (event, context) => {
   const array = event.body.split('email=')
   const email = decodeURIComponent(array[1])
-  console.log('email:', email)
+
   try {
     mongoose.connect(process.env.MONGODB_URI_DEPLOY_DESIGNER, {
       useNewUrlParser: true,
