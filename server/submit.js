@@ -26,7 +26,10 @@ exports.handler = async (event, context) => {
     }
     mongoose.disconnect()
     return {
-      statusCode: 200,
+      statusCode: 302,
+      headers: {
+        Location: '/early-access',
+      },
       body: 'Success',
     }
   } catch (err) {
