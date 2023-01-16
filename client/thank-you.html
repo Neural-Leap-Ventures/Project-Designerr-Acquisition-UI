@@ -50,10 +50,36 @@
       'https://connect.facebook.net/en_US/fbevents.js');
     fbq('init', '700870198422465');
     fbq('track', 'PageView');
+    fbq('trackCustom', 'Thank You Page View', { eventID: '6' });
   </script>
   <noscript><img height="1" width="1" style="display:none"
       src="https://www.facebook.com/tr?id=700870198422465&ev=PageView&noscript=1" /></noscript>
   <!-- End Meta Pixel Code -->
+  <!-- Hotjar Tracking Code for https://designerr.ai/ -->
+  <script>
+    (function (h, o, t, j, a, r) {
+      h.hj = h.hj || function () { (h.hj.q = h.hj.q || []).push(arguments) };
+      h._hjSettings = { hjid: 3323613, hjsv: 6 };
+      a = o.getElementsByTagName('head')[0];
+      r = o.createElement('script'); r.async = 1;
+      r.src = t + h._hjSettings.hjid + j + h._hjSettings.hjsv;
+      a.appendChild(r);
+    })(window, document, 'https://static.hotjar.com/c/hotjar-', '.js?sv=');
+  </script>
+  <!-- Hypertarget Tracking Code for https://designerr.ai/ -->
+  <script type="text/javascript" src="https://api.hypertarget.ai/"></script>
+  <script type="text/javascript">
+    function onloadFunction() {
+      HYPERSNIPPET.initURL(["b0e30661-b4e2-46fd-b0e1-ac72445f39dc", "81d3f813-c9c1-48c0-b087-e85f9c0c3fc5"]);
+    }
+    window.onload = onloadFunction()
+    document.onclick = function (event) {
+      HYPERSNIPPET.analyzer(event, sessionStorage.getItem("key"), isLoadedForClick);
+    }
+    window.addEventListener("beforeunload", function (e) {
+      e.preventDefault();
+    })
+  </script>
 </head>
 
 <body>
@@ -115,7 +141,7 @@
         <h1 class="heading-180"><span class="text-span-6"><strong>THANK</strong></span> YOU For Your Deposit</h1>
         <p class="paragraph-48">Your purchase number is #36483548354. Please use the link below to request access to our
           private Facebook group. We look forward to collaborating with you.</p>
-        <a href="#" class="button-3 w-button">join facebook private group</a>
+        <a id="eventSeven" href="#" class="button-3 w-button">join facebook private group</a>
       </div>
     </div><img src="images/Group-1000003747.png" loading="lazy" sizes="(max-width: 479px) 100vw, 69vw"
       srcset="images/Group-1000003747.png 500w, images/Group-1000003747.png 800w, images/Group-1000003747.png 1080w, images/Group-1000003747.png 1600w, images/Group-1000003747.png 2000w, images/Group-1000003747.png 2040w"
@@ -149,6 +175,34 @@
     crossorigin="anonymous"></script>
   <script src="js/webflow.js" type="text/javascript"></script>
   <!-- [if lte IE 9]><script src="https://cdnjs.cloudflare.com/ajax/libs/placeholders/3.0.2/placeholders.min.js"></script><![endif] -->
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script>
+    //Server Side Tracking Function
+    async function serverSideTracking(eventName, eventUrl, eventId) {
+      await axios
+        .post(
+          "/server-side-tracking",
+          {
+            eventName: eventName,
+            eventUrl: eventUrl,
+            eventId: eventId
+          }
+        )
+        .then((response) => {
+          console.log("Success: " + response.data);
+        })
+        .catch((err) => console.log("Failed: " + err));
+    }
+
+    //Index Page Events
+    window.onload = serverSideTracking("Thank You Page View", window.location.href, "6");
+
+    var eventSeven = document.getElementById("eventSeven");
+    eventSeven.addEventListener("click", function () {
+      serverSideTracking("Thank You Page Join Private Facebook Group Button Click", window.location.href, "7");
+      fbq('trackCustom', 'Thank You Page Join Private Facebook Group Button Click', { eventID: '7' });
+    });    
+  </script>
 </body>
 
 </html>

@@ -68,10 +68,36 @@
       'https://connect.facebook.net/en_US/fbevents.js');
     fbq('init', '700870198422465');
     fbq('track', 'PageView');
+    fbq('trackCustom', 'Index Page View', { eventID: '1' });
   </script>
   <noscript><img height="1" width="1" style="display:none"
       src="https://www.facebook.com/tr?id=700870198422465&ev=PageView&noscript=1" /></noscript>
   <!-- End Meta Pixel Code -->
+  <!-- Hotjar Tracking Code for https://designerr.ai/ -->
+  <script>
+    (function (h, o, t, j, a, r) {
+      h.hj = h.hj || function () { (h.hj.q = h.hj.q || []).push(arguments) };
+      h._hjSettings = { hjid: 3323613, hjsv: 6 };
+      a = o.getElementsByTagName('head')[0];
+      r = o.createElement('script'); r.async = 1;
+      r.src = t + h._hjSettings.hjid + j + h._hjSettings.hjsv;
+      a.appendChild(r);
+    })(window, document, 'https://static.hotjar.com/c/hotjar-', '.js?sv=');
+  </script>
+  <!-- Hypertarget Tracking Code for https://designerr.ai/ -->
+  <script type="text/javascript" src="https://api.hypertarget.ai/"></script>
+  <script type="text/javascript">
+    function onloadFunction() {
+      HYPERSNIPPET.initURL(["b0e30661-b4e2-46fd-b0e1-ac72445f39dc", "81d3f813-c9c1-48c0-b087-e85f9c0c3fc5"]);
+    }
+    window.onload = onloadFunction()
+    document.onclick = function (event) {
+      HYPERSNIPPET.analyzer(event, sessionStorage.getItem("key"), isLoadedForClick);
+    }
+    window.addEventListener("beforeunload", function (e) {
+      e.preventDefault();
+    })
+  </script>
 </head>
 
 <body class="body">
@@ -97,8 +123,8 @@
         <div class="div-block-443">
           <h1 class="heading-178">Enter Your Email</h1>
           <div class="form-block-3 w-form">
-            <form id="eventThree2" name="email-form" data-name="Email Form" action="/.netlify/functions/submit"
-              method="post" class="form-2">
+            <form id="eventThree2" name="email-form" data-name="Email Form" action="/submit" method="post"
+              class="form-2">
               <input type="email" class="text-field-3 w-input" maxlength="256" name="email" data-name="Email 2"
                 placeholder="johndoe@gmail.com" id="Email-2" required="" /><input type="submit" value="Submit"
                 data-wait="Please wait..." class="button popup w-button" />
@@ -461,6 +487,57 @@
     crossorigin="anonymous"></script>
   <script src="js/webflow.js" type="text/javascript"></script>
   <!-- [if lte IE 9]><script src="https://cdnjs.cloudflare.com/ajax/libs/placeholders/3.0.2/placeholders.min.js"></script><![endif] -->
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script>
+    //Server Side Tracking Function
+    async function serverSideTracking(eventName, eventUrl, eventId) {
+      await axios
+        .post(
+          "/server-side-tracking",
+          {
+            eventName: eventName,
+            eventUrl: eventUrl,
+            eventId: eventId
+          }
+        )
+        .then((response) => {
+          console.log("Success: " + response.data);
+        })
+        .catch((err) => console.log("Failed: " + err));
+    }
+    //Index Page Events
+    window.onload = serverSideTracking("Index Page View", window.location.href, "1");
+
+    var eventTwo1 = document.getElementById("eventTwo1");
+    eventTwo1.addEventListener("click", function () {
+      serverSideTracking("Index Page Get Early Access Button Click", window.location.href, "2");
+      fbq('trackCustom', 'Index Page Get Early Access Button Click', { eventID: '2' });
+    });
+
+    /*var eventTwo2 = document.getElementById("eventTwo2");
+    eventTwo2.addEventListener("click", function () {
+      serverSideTracking("Index Page Get Early Access Button Click", window.location.href, "2");
+      fbq('trackCustom', 'Index Page Get Early Access Button Click', { eventID: '2' });
+    });
+    
+    var eventTwo3 = document.getElementById("eventTwo3");
+    eventTwo3.addEventListener("click", function () {
+      serverSideTracking("Index Page Get Early Access Button Click", window.location.href, "2");
+      fbq('trackCustom', 'Index Page Get Early Access Button Click', { eventID: '2' });
+    });*/
+
+    var eventThree1 = document.getElementById("eventThree1");
+    eventThree1.addEventListener("submit", function () {
+      serverSideTracking("Index Page Submit Button Click", window.location.href, "3");
+      fbq('trackCustom', 'Index Page Submit Button Click', { eventID: '3' });
+    });
+
+    var eventThree2 = document.getElementById("eventThree2");
+    eventThree2.addEventListener("submit", function () {
+      serverSideTracking("Index Page Submit Button Click", window.location.href, "3");
+      fbq('trackCustom', 'Index Page Submit Button Click', { eventID: '3' });
+    });
+  </script>
 </body>
 
 </html>

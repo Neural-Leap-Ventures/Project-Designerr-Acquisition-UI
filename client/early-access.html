@@ -60,7 +60,7 @@
     !function (f, b, e, v, n, t, s) {
       if (f.fbq) return; n = f.fbq = function () {
         n.callMethod ?
-        n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+          n.callMethod.apply(n, arguments) : n.queue.push(arguments)
       };
       if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
       n.queue = []; t = b.createElement(e); t.async = !0;
@@ -70,10 +70,36 @@
       'https://connect.facebook.net/en_US/fbevents.js');
     fbq('init', '700870198422465');
     fbq('track', 'PageView');
+    fbq("trackCustom", "Early Access Page View", { eventID: "4" });
   </script>
   <noscript><img height="1" width="1" style="display:none"
       src="https://www.facebook.com/tr?id=700870198422465&ev=PageView&noscript=1" /></noscript>
   <!-- End Meta Pixel Code -->
+  <!-- Hotjar Tracking Code for https://designerr.ai/ -->
+  <script>
+    (function (h, o, t, j, a, r) {
+      h.hj = h.hj || function () { (h.hj.q = h.hj.q || []).push(arguments) };
+      h._hjSettings = { hjid: 3323613, hjsv: 6 };
+      a = o.getElementsByTagName('head')[0];
+      r = o.createElement('script'); r.async = 1;
+      r.src = t + h._hjSettings.hjid + j + h._hjSettings.hjsv;
+      a.appendChild(r);
+    })(window, document, 'https://static.hotjar.com/c/hotjar-', '.js?sv=');
+  </script>
+  <!-- Hypertarget Tracking Code for https://designerr.ai/ -->
+  <script type="text/javascript" src="https://api.hypertarget.ai/"></script>
+  <script type="text/javascript">
+    function onloadFunction() {
+      HYPERSNIPPET.initURL(["b0e30661-b4e2-46fd-b0e1-ac72445f39dc", "81d3f813-c9c1-48c0-b087-e85f9c0c3fc5"]);
+    }
+    window.onload = onloadFunction()
+    document.onclick = function (event) {
+      HYPERSNIPPET.analyzer(event, sessionStorage.getItem("key"), isLoadedForClick);
+    }
+    window.addEventListener("beforeunload", function (e) {
+      e.preventDefault();
+    })
+  </script>
 </head>
 
 <body>
@@ -154,19 +180,10 @@
                     <label for="name-3" class="form_text-popup">Card details*</label>
                     <div class="form_input-popup w-input" id="card-element"></div>
                   </div>
-                  <!--  <div class="duplicate-btn">
-                      <input
-                        id="eventSix"
-                        type="submit"
-                        value="Submit"
-                        data-wait="Please wait..."
-                        class="button is-form-submit popup-btn w-button"
-                      />
-                    </div> -->
                   <button class="duplicate-btn">
                     <div class="btn-text">SUBMIT</div>
-                    <img src="images/arrow.svg" loading="lazy" alt="" class="arrow" /><input type="submit"
-                      value="Submit" data-wait="Please wait..." class="button-2 arrow-btn w-button" />
+                    <img src="images/arrow.svg" loading="lazy" alt="" class="arrow" /><input id="eventFive"
+                      type="submit" value="Submit" data-wait="Please wait..." class="button-2 arrow-btn w-button" />
                   </button>
                 </form>
                 <p id="card-errors" class="paragraph-49" style="color: red"></p>
@@ -287,7 +304,7 @@
         }
 
         await axios
-          .post('/.netlify/functions/charge', {})
+          .post('/charge', {})
           .then(async (response) => {
             const { error } = await stripe.confirmCardPayment(
               response.data.clientSecret,
@@ -320,6 +337,30 @@
           })
       })
     })
+  </script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script>
+    //Server Side Tracking Function
+    async function serverSideTracking(eventName, eventUrl, eventId) {
+      await axios
+        .post("/server-side-tracking", {
+          eventName: eventName,
+          eventUrl: eventUrl,
+          eventId: eventId,
+        })
+        .then((response) => {
+          console.log("Success: " + response.data);
+        })
+        .catch((err) => console.log("Failed: " + err));
+    }
+    //Index Page Events
+    window.onload = serverSideTracking("Early Access Page View", window.location.href, "4");
+
+    var eventFive = document.getElementById("eventFive");
+    eventFive.addEventListener("click", function () {
+      serverSideTracking("Early Access Page Submit Button Click", window.location.href, "5");
+      fbq("trackCustom", "Early Access Page Submit Button Click", { eventID: "5" });
+    });
   </script>
 </body>
 
