@@ -180,6 +180,7 @@
     //Stripe Card Payment Function
     document.addEventListener("DOMContentLoaded", async () => {
       const stripe = Stripe("pk_test_51MePngKc5uQQJVSzbU0g5K6t99trfOwuxMoVQH3uuzTG8kt4WKoNtuEb68Gas1bRydXzVDOWN64yhZjXDZIT2hkB00rQLKcKpO")
+      console.log("Payment start ----------- ");
       var elements = stripe.elements();
       var style = {
         base: {
@@ -190,6 +191,7 @@
 
       var cardElement = elements.create("card", { style: style });
       cardElement.mount("#card-element");
+      console.log("Card Element ----------- ", cardElement);
 
       var form = document.getElementById("payment-form");
       form.addEventListener("submit", async function (event) {
@@ -247,6 +249,7 @@
   <script>
     //Stripe Buttons Payment Function
     document.addEventListener("DOMContentLoaded", async () => {
+      console.log("2nd Payment start ----------- ");
       // 1. Initialize Stripe
       const stripe = Stripe(
         "pk_test_51MePngKc5uQQJVSzbU0g5K6t99trfOwuxMoVQH3uuzTG8kt4WKoNtuEb68Gas1bRydXzVDOWN64yhZjXDZIT2hkB00rQLKcKpO",
@@ -266,6 +269,8 @@
         requestPayerName: true,
         requestPayerEmail: true,
       });
+
+      console.log("Payment requvest ----------- ", paymentRequest);
 
       // 3. Create a PaymentRequestButton element
       const elements = stripe.elements();
@@ -316,7 +321,7 @@
               errorElement.style.display = "block";
               return;
             }
-            //console.log(`Client secret returned.`);
+            console.log(`Client secret returned.`);
 
             // Confirm the PaymentIntent without handling potential next actions (yet).
             let { error, paymentIntent } = await stripe.confirmCardPayment(
