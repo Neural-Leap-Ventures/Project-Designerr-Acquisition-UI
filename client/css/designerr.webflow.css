@@ -1210,6 +1210,11 @@
   left: auto;
 }
 
+.html-embed {
+  height: 50px;
+  padding: 17px 10px;
+}
+
 @media screen and (min-width: 1280px) {
   .image-116 {
     position: absolute;
@@ -1875,5 +1880,10 @@
 
   .brand-2 {
     width: 70%;
+  }
+
+  .html-embed {
+    padding-right: 5px;
+    padding-left: 5px;
   }
 }
