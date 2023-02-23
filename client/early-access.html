@@ -98,44 +98,19 @@
             <div class="popup-head">Payment Information</div>
             <div class="form_popup">
               <div class="form-block w-form">
-                <!-- <form id="payment-form" name="email-form" data-name="Email Form" method="get"
-                  class="form_popup-component"> -->
-                  <!-- <form id="payment-form" class="form_popup-component"></form>
+                <form id="payment-form" name="email-form" data-name="Email Form" method="get"
+                  class="form_popup-component">
                   <div class="form_text-input-wrap"><label for="name-3" class="form_text-popup">Card details*</label>
                     <div class="w-embed">
                       <div id="card-element"></div>
                     </div>
                   </div>
-                  <div class="spinner hidden" id="spinner"></div>
-                  <p id="card-error" class="dcard-err" role="alert"></p>
-                  <div id="eventFive" class="duplicate-btn"> -->
-                    <!-- <div class="btn-text">SUBMIT</div><img src="images/arrow.svg" loading="lazy" alt=""
+                  <div id="eventFive" class="duplicate-btn">
+                    <div class="btn-text">SUBMIT</div><img src="images/arrow.svg" loading="lazy" alt=""
                       class="arrow"><input type="submit" value="Submit" data-wait="Please wait..."
-                      class="button-2 arrow-btn w-button"> -->
-                    <!-- <button id="submit" class="arrow-btn w-button"> <span id="button-text">SUBMIT<img
-                        src="images/arrow.svg" loading="lazy" alt="" class="arrow"></span></button>
-
-                  </div>
-                </form> -->
-
-                <form id="payment-form" class="form_popup-component">
-                  <div class="form_text-input-wrap"><label for="name-3" class="form_text-popup">Card
-                      details*</label>
-                    <div class="w-embed">
-                      <div class="form_input-popup w-input" id="card-element"></div>
-                    </div>
-                    <!-- <input type="text" class="form_input-popup hide w-input" maxlength="256" name="name-3"
-                      data-name="Name 3" placeholder="0000 0000 0000 000" id="name-3"> -->
-                  </div>
-                  <div class="spinner hidden" id="spinner"></div>
-                  <p id="card-error" class="dcard-err" role="alert"></p>
-                  <div class="duplicate-btn">
-                    <button id="submit" class="arrow-btn w-button"> <span id="button-text">SUBMIT<img
-                          src="images/arrow.svg" loading="lazy" alt="" class="arrow-2"></span></button>
-
+                      class="button-2 arrow-btn w-button">
                   </div>
                 </form>
-
                 <div class="w-form-done">
                   <div>Thank you! Your submission has been received!</div>
                 </div>
@@ -202,237 +177,288 @@
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 
   <script>
-    
-    // This is your test publishable API key.
-      //var stripe = Stripe("pk_test_51MZy8TSGOJPd1sa9jLfI9tXFj3vb37UqWrQ4k3xEc2Zg57VK4XjcNrozunRJJwcQUQyccF7N14RfnMNi0nTuaLzU00jGacoMhi");
-      var stripe = Stripe("pk_test_51MePngKc5uQQJVSzbU0g5K6t99trfOwuxMoVQH3uuzTG8kt4WKoNtuEb68Gas1bRydXzVDOWN64yhZjXDZIT2hkB00rQLKcKpO");
-
-
-      // Disable the button until we have Stripe set up on the page
-      const button = document.querySelector("button");
-
-    //button.addEventListener("click", () => {
-        // Disable the button to prevent multiple clicks
-        button.disabled = true;
+    //Stripe Card Payment Function
+    document.addEventListener("DOMContentLoaded", async () => {
+      const stripe = Stripe("pk_test_51MePngKc5uQQJVSzbU0g5K6t99trfOwuxMoVQH3uuzTG8kt4WKoNtuEb68Gas1bRydXzVDOWN64yhZjXDZIT2hkB00rQLKcKpO")
       var elements = stripe.elements();
       var style = {
         base: {
-        color: "#32325d",
-      fontFamily: 'Arial, sans-serif',
-      fontSmoothing: "antialiased",
-      fontSize: "16px",
-      "::placeholder": {
-        color: "#32325d"
-        }
-      },
-      invalid: {
-        fontFamily: 'Arial, sans-serif',
-      color: "#fa755a",
-      iconColor: "#fa755a"
-      }
-    };
+          fontSize: "16px",
+          color: "#32325d",
+        },
+      };
 
-      var card = elements.create("card", {style: style });
-      // Stripe injects an iframe into the DOM
-      card.mount("#card-element");
-
-      var purchase = "";
-
-      purchase = {
-        items: [{id: "onload" }]
-    };
-
-      card.on("change", function (event) {
-        // Disable the Pay button if there are no card details in the Element
-        //console.log("value", event?.value.postalCode);
-        purchase = {
-          items: [{ id: "payment" }]
-        };
-      //console.log("payment", purchase);
-      document.querySelector("button").disabled = event.empty;
-      document.querySelector("#card-error").textContent = event.error ? event.error.message : "";
-    });
-
-      //console.log("purchase", purchase);
+      var cardElement = elements.create("card", { style: style });
+      cardElement.mount("#card-element");
 
       var form = document.getElementById("payment-form");
-      form.addEventListener("submit", function (event) {
+      form.addEventListener("submit", async function (event) {
         event.preventDefault();
-      onSubmitPayment();
-    });
-      async function onSubmitPayment() {
-      const res = await fetch("/charge", {
-        method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-        },
-      body: JSON.stringify(purchase)
-      })
 
-      var data = await res.json();
-      // Complete payment when the submit button is clicked
-      //console.log("Client Secret", String(data.clientSecret));
-
-      payWithCard(stripe, card, String(data.clientSecret));
-    }
-
-      // Calls stripe.confirmCardPayment
-      // If the card requires authentication Stripe shows a pop-up modal to
-      // prompt the user to enter authentication details without leaving your page.
-      var payWithCard = function (stripe, card, clientSecret) {
-        loading(true);
-      stripe
-      .confirmCardPayment(clientSecret, {
-        payment_method: {
-        card: card
-          }
-        })
-      .then(function (result) {
-          if (result.error) {
-        // Show error to your customer
-        showError(result.error.message);
-          } else {
-        // The payment succeeded!
-        orderComplete(result.paymentIntent.id);
-      localStorage.setItem("transaction", JSON.stringify(result.paymentIntent.id));
-          }
+        const charge = await stripe.createPaymentMethod({
+          type: "card",
+          card: cardElement,
         });
-    };
 
-      /* ------- UI helpers ------- */
+        if (charge.error) {
+          var errorElement = document.getElementById("card-errors");
+          errorElement.textContent = charge.error.message;
+          errorElement.style.display = "block";
+          return;
+        }
 
-      // Shows a success message when the payment is complete
-      var orderComplete = function (paymentIntentId) {
-        loading(false);
+        await axios
+          .post("/stripe-card-charge", {})
+          .then(async (response) => {
+            //console.log(response)
+            const { error } = await stripe.confirmCardPayment(
+              response.data.clientSecret,
+              {
+                payment_method: charge.paymentMethod.id,
+              }
+            );
 
-      var successElement = document.getElementById('card-success')
-      successElement.textContent =
-      'Thank you! Your submission has been received!'
-      successElement.style.display = 'block'
-      var errorElement = document.getElementById('card-errors');
-      errorElement.textContent =
-      'Oops! Something went wrong while submitting the form.'
-      errorElement.style.display = 'none'
-      //document.querySelector(".result-message").classList.remove("hidden");
-      document.querySelector("button").disabled = true;
-      window.location.replace('thank-you.html')
-    };
+            if (error) {
+              //console.log("Failed: " + error)
+              var errorElement = document.getElementById("card-errors");
+              console.log(error)
+              errorElement.textContent = "Failed payment.: " + error.message;
+              errorElement.style.display = "block";
+              return;
+            } else {
+              var errorElement = document.getElementById("card-errors");
+              window.location.replace("/thank-you-early-access");
+              errorElement.textContent = "SUCCESS";
+              errorElement.style.display = "block";
+            }
+          })
+          .catch((err) => {
+            var errorElement = document.getElementById("card-errors");
+            console.log(error)
+            errorElement.textContent = "Failed: " + err.message;
+            errorElement.style.display = "block";
+            //console.log("Failed: " + err)
+          });
+      });
 
-      // Show the customer the error from Stripe if their card fails to charge
-      var showError = function (errorMsgText) {
-        loading(false);
-      var errorElement = document.getElementById('card-errors');
-      errorElement.textContent =
-      'Oops! Something went wrong while submitting the form.'
-      errorElement.style.display = 'block'
-      var errorMsg = document.querySelector("#card-error");
-      errorMsg.textContent = errorMsgText;
-      setTimeout(function () {
-        errorMsg.textContent = "";
-      errorElement.style.display = 'none'
-      }, 4000);
-    };
-
-
-      // Show a spinner on payment submission
-      var loading = function (isLoading) {
-      if (isLoading) {
-        // Disable the button and show a spinner
-        document.querySelector("button").disabled = true;
-      document.querySelector("#spinner").classList.remove("hidden");
-      document.querySelector("#button-text").classList.add("hidden");
-      } else {
-        document.querySelector("button").disabled = false;
-      document.querySelector("#spinner").classList.add("hidden");
-      document.querySelector("#button-text").classList.remove("hidden");
-      }
-    };
+    })
   </script>
+
+  <script>
+    //Stripe Buttons Payment Function
+    document.addEventListener("DOMContentLoaded", async () => {
+      // 1. Initialize Stripe
+      const stripe = Stripe(
+        "pk_test_51MePngKc5uQQJVSzbU0g5K6t99trfOwuxMoVQH3uuzTG8kt4WKoNtuEb68Gas1bRydXzVDOWN64yhZjXDZIT2hkB00rQLKcKpO",
+        {
+          apiVersion: "2020-08-27",
+        }
+      );
+
+      // 2. Create a payment request object
+      var paymentRequest = stripe.paymentRequest({
+        country: "US",
+        currency: "usd",
+        total: {
+          label: "total",
+          amount: 1000,
+        },
+        requestPayerName: true,
+        requestPayerEmail: true,
+      });
+
+      // 3. Create a PaymentRequestButton element
+      const elements = stripe.elements();
+      const prButton = elements.create("paymentRequestButton", {
+        paymentRequest: paymentRequest,
+      });
+      // Check the availability of the Payment Request API,
+      // then mount the PaymentRequestButton
+      paymentRequest.canMakePayment().then(function (result) {
+        //console.log(result)
+        if (result?.googlePay) {
+          document.getElementById("applePay-element").innerHTML =
+            "Apple pay is not supported on your current environment";
+          document.getElementById("applePay-element").style.color = "red";
+          prButton.mount("#gpay-element");
+          //console.log('Apple Pay support not found. Check the pre-requisites above and ensure you are testing in a supported browser.');
+        } else if (result?.applePay) {
+          document.getElementById("gpay-element").innerHTML =
+            "Google pay is not supported on your current environment";
+          document.getElementById("gpay-element").style.color = "red";
+          prButton.mount("#applePay-element");
+          //console.log('Google Pay support not found. Check the pre-requisites above and ensure you are testing in a supported browser.');
+        } else {
+          document.getElementById("gpay-element").innerHTML =
+            "Google pay is not supported on your current environment";
+          document.getElementById("gpay-element").style.color = "red";
+          document.getElementById("applePay-element").innerHTML =
+            "Apple pay is not supported on your current environment";
+          document.getElementById("applePay-element").style.color = "red";
+          //console.log('Google Pay and Apple Pay support not found. Check the pre-requisites above and ensure you are testing in a supported browser.');
+        }
+      });
+
+      paymentRequest.on("paymentmethod", async (e) => {
+        // Make a call to the server to create a new
+        // payment intent and store its client_secret.
+
+        await axios
+          .post("/stripe-button-charge", {
+            currency: "usd",
+            paymentMethodType: "card",
+          })
+          .then(async (response) => {
+            //console.log(response)
+            if (!response.data.clientSecret) {
+              var errorElement = document.getElementById("card-errors");
+              errorElement.textContent = "failed !";
+              errorElement.style.display = "block";
+              return;
+            }
+            //console.log(`Client secret returned.`);
+
+            // Confirm the PaymentIntent without handling potential next actions (yet).
+            let { error, paymentIntent } = await stripe.confirmCardPayment(
+              response.data.clientSecret,
+              {
+                payment_method: e.paymentMethod.id,
+              },
+              {
+                handleActions: false,
+              }
+            );
+
+            if (error) {
+              var errorElement = document.getElementById("card-errors");
+              errorElement.textContent = error.message;
+              errorElement.style.display = "block";
+
+              // Report to the browser that the payment failed, prompting it to
+              // re-show the payment interface, or show an error message and close
+              // the payment interface.
+              //console.log('fail');
+              return;
+            }
+            // Report to the browser that the confirmation was successful, prompting
+            // it to close the browser payment method collection interface.
+            //console.log('success');
+
+            // Check if the PaymentIntent requires any actions and if so let Stripe.js
+            // handle the flow. If using an API version older than "2019-02-11" instead
+            // instead check for: `paymentIntent.status === "requires_source_action"`.
+            if (paymentIntent.status === "requires_action") {
+              // Let Stripe.js handle the rest of the payment flow.
+              let { error, paymentIntent } = await stripe.confirmCardPayment(
+                clientSecret
+              );
+              if (error) {
+                // The payment failed -- ask your customer for a new payment method.
+                //console.log(error.message);
+                var errorElement = document.getElementById("card-errors");
+                errorElement.textContent = error.message;
+                errorElement.style.display = "block";
+                return;
+              }
+              //console.log(`Payment ${paymentIntent.status}: ${paymentIntent.id}`);
+              window.location.replace("/thank-you-early-access");
+              return;
+            }
+
+            //console.log(`Payment ${paymentIntent.status}: ${paymentIntent.id}`);
+            window.location.replace("/thank-you-early-access");
+            return;
+          });
+      });
+    });
+  </script>
+
+
 
   <!-- <script>
     //Stripe Payment
     document.addEventListener('DOMContentLoaded', async () => {
       const stripe = Stripe(
         'pk_live_51MePngKc5uQQJVSzl9URtVMkgVBM8hT50GIF0myNi8ZyQCPQpFcv7l3ItMd2MXhO0Lrubqw3qNEm8dT24AMUrA0G0042Tk9r8o'
-        )
-        var elements = stripe.elements()
-        var style = {
-          base: {
+      )
+      var elements = stripe.elements()
+      var style = {
+        base: {
           fontSize: '16px',
-        color: '#32325d',
+          color: '#32325d',
         },
       }
-        var cardElement = elements.create('card', {style: style })
-        cardElement.mount('#card-element')
-        var form = document.getElementById('payment-form')
-        form.addEventListener('submit', async function (event) {
-          event.preventDefault()
+      var cardElement = elements.create('card', { style: style })
+      cardElement.mount('#card-element')
+      var form = document.getElementById('payment-form')
+      form.addEventListener('submit', async function (event) {
+        event.preventDefault()
         const charge = await stripe.createPaymentMethod({
           type: 'card',
-        card: cardElement,
+          card: cardElement,
         })
         if (charge.error) {
           var errorElement = document.getElementById('card-errors')
-        errorElement.textContent = charge.error.message
-        errorElement.style.display = 'block'
-        return
+          errorElement.textContent = charge.error.message
+          errorElement.style.display = 'block'
+          return
         }
         await axios
-        .post('/charge', { })
+          .post('/charge', {})
           .then(async (response) => {
-            const {error} = await stripe.confirmCardPayment(
-        response.data.clientSecret,
-        {
-          payment_method: charge.paymentMethod.id,
+            const { error } = await stripe.confirmCardPayment(
+              response.data.clientSecret,
+              {
+                payment_method: charge.paymentMethod.id,
               }
-        )
-        if (error) {
+            )
+            if (error) {
               //console.log("Failed: " + error)
               var errorElement = document.getElementById('card-errors')
-        errorElement.textContent =
-        'Oops! Something went wrong while submitting the form.'
-        errorElement.style.display = 'block'
-        return
+              errorElement.textContent =
+                'Oops! Something went wrong while submitting the form.'
+              errorElement.style.display = 'block'
+              return
             } else {
               var errorElement = document.getElementById('card-success')
-        window.location.replace('/thank-you')
-        errorElement.textContent =
-        'Thank you! Your submission has been received!'
-        errorElement.style.display = 'block'
+              window.location.replace('/thank-you')
+              errorElement.textContent =
+                'Thank you! Your submission has been received!'
+              errorElement.style.display = 'block'
             }
           })
           .catch((err) => {
             var errorElement = document.getElementById('card-errors')
-        errorElement.textContent =
-        'Oops! Something went wrong while submitting the form.'
-        errorElement.style.display = 'block'
+            errorElement.textContent =
+              'Oops! Something went wrong while submitting the form.'
+            errorElement.style.display = 'block'
             //console.log("Failed: " + err)
           })
       })
     })
-  </script> -->
-  <script>
-        //Server Side Tracking Function
-        async function serverSideTracking(eventName, eventUrl, eventId) {
-          await axios
-            .post("/server-side-tracking", {
-              eventName: eventName,
-              eventUrl: eventUrl,
-              eventId: eventId,
-            })
-            .then((response) => {
-              console.log("Success: " + response.data);
-            })
-            .catch((err) => console.log("Failed: " + err));
-    }
-        //Index Page Events
-        window.onload = serverSideTracking("Early Access Page View", window.location.href, "4");
-        var eventFive = document.getElementById("eventFive");
-        eventFive.addEventListener("click", function () {
-          serverSideTracking("Early Access Page Submit Button Click", window.location.href, "5");
-        fbq("trackCustom", "Early Access Page Submit Button Click", {eventID: "5" });
-    });
   </script>
+  <script>
+    //Server Side Tracking Function
+    async function serverSideTracking(eventName, eventUrl, eventId) {
+      await axios
+        .post("/server-side-tracking", {
+          eventName: eventName,
+          eventUrl: eventUrl,
+          eventId: eventId,
+        })
+        .then((response) => {
+          console.log("Success: " + response.data);
+        })
+        .catch((err) => console.log("Failed: " + err));
+    }
+    //Index Page Events
+    window.onload = serverSideTracking("Early Access Page View", window.location.href, "4");
+    var eventFive = document.getElementById("eventFive");
+    eventFive.addEventListener("click", function () {
+      serverSideTracking("Early Access Page Submit Button Click", window.location.href, "5");
+      fbq("trackCustom", "Early Access Page Submit Button Click", { eventID: "5" });
+    });
+  </script> -->
 </body>
 
 </html>
