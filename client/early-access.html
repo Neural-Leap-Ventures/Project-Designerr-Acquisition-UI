@@ -242,7 +242,7 @@
       onSubmitPayment();
     });
       async function onSubmitPayment() {
-      const res = await fetch("http://localhost:3000/create-payment-intent", {
+      const res = await fetch("/charge", {
         method: "POST",
       headers: {
         "Content-Type": "application/json"
