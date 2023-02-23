@@ -98,17 +98,23 @@
             <div class="popup-head">Payment Information</div>
             <div class="form_popup">
               <div class="form-block w-form">
-                <form id="payment-form" name="email-form" data-name="Email Form" method="get"
-                  class="form_popup-component">
+                <!-- <form id="payment-form" name="email-form" data-name="Email Form" method="get"
+                  class="form_popup-component"> -->
+                  <form id="payment-form" class="form_popup-component"></form>
                   <div class="form_text-input-wrap"><label for="name-3" class="form_text-popup">Card details*</label>
                     <div class="w-embed">
                       <div id="card-element"></div>
                     </div>
                   </div>
+                  <div class="spinner hidden" id="spinner"></div>
+                  <p id="card-error" class="dcard-err" role="alert"></p>
                   <div id="eventFive" class="duplicate-btn">
-                    <div class="btn-text">SUBMIT</div><img src="images/arrow.svg" loading="lazy" alt=""
+                    <!-- <div class="btn-text">SUBMIT</div><img src="images/arrow.svg" loading="lazy" alt=""
                       class="arrow"><input type="submit" value="Submit" data-wait="Please wait..."
-                      class="button-2 arrow-btn w-button">
+                      class="button-2 arrow-btn w-button"> -->
+                    <button id="submit" class="arrow-btn w-button"> <span id="button-text">SUBMIT<img
+                        src="images/arrow.svg" loading="lazy" alt="" class="arrow"></span></button>
+
                   </div>
                 </form>
                 <div class="w-form-done">
@@ -175,88 +181,237 @@
   <script src="js/webflow.js" type="text/javascript"></script>
   <!-- [if lte IE 9]><script src="https://cdnjs.cloudflare.com/ajax/libs/placeholders/3.0.2/placeholders.min.js"></script><![endif] -->
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
   <script>
+    
+    // This is your test publishable API key.
+      //var stripe = Stripe("pk_test_51MZy8TSGOJPd1sa9jLfI9tXFj3vb37UqWrQ4k3xEc2Zg57VK4XjcNrozunRJJwcQUQyccF7N14RfnMNi0nTuaLzU00jGacoMhi");
+      var stripe = Stripe("pk_test_51MePngKc5uQQJVSzbU0g5K6t99trfOwuxMoVQH3uuzTG8kt4WKoNtuEb68Gas1bRydXzVDOWN64yhZjXDZIT2hkB00rQLKcKpO");
+
+
+      // Disable the button until we have Stripe set up on the page
+      const button = document.querySelector("button");
+
+    //button.addEventListener("click", () => {
+        // Disable the button to prevent multiple clicks
+        button.disabled = true;
+      var elements = stripe.elements();
+      var style = {
+        base: {
+        color: "#32325d",
+      fontFamily: 'Arial, sans-serif',
+      fontSmoothing: "antialiased",
+      fontSize: "16px",
+      "::placeholder": {
+        color: "#32325d"
+        }
+      },
+      invalid: {
+        fontFamily: 'Arial, sans-serif',
+      color: "#fa755a",
+      iconColor: "#fa755a"
+      }
+    };
+
+      var card = elements.create("card", {style: style });
+      // Stripe injects an iframe into the DOM
+      card.mount("#card-element");
+
+      var purchase = "";
+
+      purchase = {
+        items: [{id: "onload" }]
+    };
+
+      card.on("change", function (event) {
+        // Disable the Pay button if there are no card details in the Element
+        //console.log("value", event?.value.postalCode);
+        purchase = {
+          items: [{ id: "payment" }]
+        };
+      //console.log("payment", purchase);
+      document.querySelector("button").disabled = event.empty;
+      document.querySelector("#card-error").textContent = event.error ? event.error.message : "";
+    });
+
+      //console.log("purchase", purchase);
+
+      var form = document.getElementById("payment-form");
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+      onSubmitPayment();
+    });
+      async function onSubmitPayment() {
+      const res = await fetch("http://localhost:3000/create-payment-intent", {
+        method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+        },
+      body: JSON.stringify(purchase)
+      })
+
+      var data = await res.json();
+      // Complete payment when the submit button is clicked
+      //console.log("Client Secret", String(data.clientSecret));
+
+      payWithCard(stripe, card, String(data.clientSecret));
+    }
+
+      // Calls stripe.confirmCardPayment
+      // If the card requires authentication Stripe shows a pop-up modal to
+      // prompt the user to enter authentication details without leaving your page.
+      var payWithCard = function (stripe, card, clientSecret) {
+        loading(true);
+      stripe
+      .confirmCardPayment(clientSecret, {
+        payment_method: {
+        card: card
+          }
+        })
+      .then(function (result) {
+          if (result.error) {
+        // Show error to your customer
+        showError(result.error.message);
+          } else {
+        // The payment succeeded!
+        orderComplete(result.paymentIntent.id);
+      localStorage.setItem("transaction", JSON.stringify(result.paymentIntent.id));
+          }
+        });
+    };
+
+      /* ------- UI helpers ------- */
+
+      // Shows a success message when the payment is complete
+      var orderComplete = function (paymentIntentId) {
+        loading(false);
+
+      var successElement = document.getElementById('card-success')
+      successElement.textContent =
+      'Thank you! Your submission has been received!'
+      successElement.style.display = 'block'
+      var errorElement = document.getElementById('card-errors');
+      errorElement.textContent =
+      'Oops! Something went wrong while submitting the form.'
+      errorElement.style.display = 'none'
+      //document.querySelector(".result-message").classList.remove("hidden");
+      document.querySelector("button").disabled = true;
+      window.location.replace('thank-you.html')
+    };
+
+      // Show the customer the error from Stripe if their card fails to charge
+      var showError = function (errorMsgText) {
+        loading(false);
+      var errorElement = document.getElementById('card-errors');
+      errorElement.textContent =
+      'Oops! Something went wrong while submitting the form.'
+      errorElement.style.display = 'block'
+      var errorMsg = document.querySelector("#card-error");
+      errorMsg.textContent = errorMsgText;
+      setTimeout(function () {
+        errorMsg.textContent = "";
+      errorElement.style.display = 'none'
+      }, 4000);
+    };
+
+
+      // Show a spinner on payment submission
+      var loading = function (isLoading) {
+      if (isLoading) {
+        // Disable the button and show a spinner
+        document.querySelector("button").disabled = true;
+      document.querySelector("#spinner").classList.remove("hidden");
+      document.querySelector("#button-text").classList.add("hidden");
+      } else {
+        document.querySelector("button").disabled = false;
+      document.querySelector("#spinner").classList.add("hidden");
+      document.querySelector("#button-text").classList.remove("hidden");
+      }
+    };
+  </script>
+
+  <!-- <script>
     //Stripe Payment
     document.addEventListener('DOMContentLoaded', async () => {
       const stripe = Stripe(
-        'pk_test_51MePngKc5uQQJVSzbU0g5K6t99trfOwuxMoVQH3uuzTG8kt4WKoNtuEb68Gas1bRydXzVDOWN64yhZjXDZIT2hkB00rQLKcKpO'
-      )
-      var elements = stripe.elements()
-      var style = {
-        base: {
+        'pk_live_51MePngKc5uQQJVSzl9URtVMkgVBM8hT50GIF0myNi8ZyQCPQpFcv7l3ItMd2MXhO0Lrubqw3qNEm8dT24AMUrA0G0042Tk9r8o'
+        )
+        var elements = stripe.elements()
+        var style = {
+          base: {
           fontSize: '16px',
-          color: '#32325d',
+        color: '#32325d',
         },
       }
-      var cardElement = elements.create('card', { style: style })
-      cardElement.mount('#card-element')
-      var form = document.getElementById('payment-form')
-      form.addEventListener('submit', async function (event) {
-        event.preventDefault()
+        var cardElement = elements.create('card', {style: style })
+        cardElement.mount('#card-element')
+        var form = document.getElementById('payment-form')
+        form.addEventListener('submit', async function (event) {
+          event.preventDefault()
         const charge = await stripe.createPaymentMethod({
           type: 'card',
-          card: cardElement,
+        card: cardElement,
         })
         if (charge.error) {
           var errorElement = document.getElementById('card-errors')
-          errorElement.textContent = charge.error.message
-          errorElement.style.display = 'block'
-          return
+        errorElement.textContent = charge.error.message
+        errorElement.style.display = 'block'
+        return
         }
         await axios
-          .post('/charge', {})
+        .post('/charge', { })
           .then(async (response) => {
-            const { error } = await stripe.confirmCardPayment(
-              response.data.clientSecret,
-              {
-                payment_method: charge.paymentMethod.id,
+            const {error} = await stripe.confirmCardPayment(
+        response.data.clientSecret,
+        {
+          payment_method: charge.paymentMethod.id,
               }
-            )
-            if (error) {
+        )
+        if (error) {
               //console.log("Failed: " + error)
               var errorElement = document.getElementById('card-errors')
-              errorElement.textContent =
-                'Oops! Something went wrong while submitting the form.'
-              errorElement.style.display = 'block'
-              return
+        errorElement.textContent =
+        'Oops! Something went wrong while submitting the form.'
+        errorElement.style.display = 'block'
+        return
             } else {
               var errorElement = document.getElementById('card-success')
-              window.location.replace('/thank-you')
-              errorElement.textContent =
-                'Thank you! Your submission has been received!'
-              errorElement.style.display = 'block'
+        window.location.replace('/thank-you')
+        errorElement.textContent =
+        'Thank you! Your submission has been received!'
+        errorElement.style.display = 'block'
             }
           })
           .catch((err) => {
             var errorElement = document.getElementById('card-errors')
-            errorElement.textContent =
-              'Oops! Something went wrong while submitting the form.'
-            errorElement.style.display = 'block'
+        errorElement.textContent =
+        'Oops! Something went wrong while submitting the form.'
+        errorElement.style.display = 'block'
             //console.log("Failed: " + err)
           })
       })
     })
-  </script>
+  </script> -->
   <script>
-    //Server Side Tracking Function
-    async function serverSideTracking(eventName, eventUrl, eventId) {
-      await axios
-        .post("/server-side-tracking", {
-          eventName: eventName,
-          eventUrl: eventUrl,
-          eventId: eventId,
-        })
-        .then((response) => {
-          console.log("Success: " + response.data);
-        })
-        .catch((err) => console.log("Failed: " + err));
+        //Server Side Tracking Function
+        async function serverSideTracking(eventName, eventUrl, eventId) {
+          await axios
+            .post("/server-side-tracking", {
+              eventName: eventName,
+              eventUrl: eventUrl,
+              eventId: eventId,
+            })
+            .then((response) => {
+              console.log("Success: " + response.data);
+            })
+            .catch((err) => console.log("Failed: " + err));
     }
-    //Index Page Events
-    window.onload = serverSideTracking("Early Access Page View", window.location.href, "4");
-    var eventFive = document.getElementById("eventFive");
-    eventFive.addEventListener("click", function () {
-      serverSideTracking("Early Access Page Submit Button Click", window.location.href, "5");
-      fbq("trackCustom", "Early Access Page Submit Button Click", { eventID: "5" });
+        //Index Page Events
+        window.onload = serverSideTracking("Early Access Page View", window.location.href, "4");
+        var eventFive = document.getElementById("eventFive");
+        eventFive.addEventListener("click", function () {
+          serverSideTracking("Early Access Page Submit Button Click", window.location.href, "5");
+        fbq("trackCustom", "Early Access Page Submit Button Click", {eventID: "5" });
     });
   </script>
 </body>
