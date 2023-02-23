@@ -794,6 +794,7 @@
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  width: 100%;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
   -webkit-flex-direction: column;
@@ -928,7 +929,7 @@
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  width: 90%;
+  width: 100%;
   margin-top: 40px;
   -webkit-box-orient: horizontal;
   -webkit-box-direction: normal;
@@ -1700,6 +1701,11 @@
     flex-direction: column;
   }
 
+  .div-block-459._69 {
+    width: 95%;
+    max-width: none;
+  }
+
   .heading-179 {
     font-size: 32px;
     line-height: 45px;
@@ -1804,8 +1810,8 @@
   }
 
   .popup-left {
-    padding-right: 20px;
-    padding-left: 20px;
+    padding-right: 10px;
+    padding-left: 10px;
   }
 
   .image-122 {
