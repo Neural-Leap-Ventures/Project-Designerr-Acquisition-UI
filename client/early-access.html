@@ -98,7 +98,7 @@
             <div class="popup-head">Payment Information</div>
             <div class="form_popup">
               <div class="form-block w-form">
-                <form id="payment-form" name="email-form" data-name="Email Form" method="get"
+                <form id="payment-form" name="email-form" data-name="Email Form"
                   class="form_popup-component">
                   <div class="form_text-input-wrap"><label for="name-3" class="form_text-popup">Card details*</label>
                     <div class="w-embed">
@@ -106,17 +106,16 @@
                     </div>
                   </div>
                   <div id="eventFive" class="duplicate-btn">
-                    <div class="btn-text">SUBMIT</div><img src="images/arrow.svg" loading="lazy" alt=""
-                      class="arrow"><input type="submit" value="Submit" data-wait="Please wait..."
-                      class="button-2 arrow-btn w-button">
+                    <input style="display:none;" id="input-submit" type="submit" value="SUBMIT" data-wait="Please wait..."
+                      class="w-button" style="background:none;" />SUBMIT<img src="images/arrow.svg" loading="lazy" alt=""
+                      class="arrow">
                   </div>
                 </form>
+                <p id="card-errors"></p>
                 <div class="w-form-done">
                   <div>Thank you! Your submission has been received!</div>
                 </div>
-                <div class="w-form-fail">
-                  <div>Oops! Something went wrong while submitting the form.</div>
-                </div>
+                
               </div>
             </div>
           </div>
@@ -179,7 +178,7 @@
     //Stripe Payment
     document.addEventListener('DOMContentLoaded', async () => {
       const stripe = Stripe(
-        'pk_test_51MePngKc5uQQJVSzbU0g5K6t99trfOwuxMoVQH3uuzTG8kt4WKoNtuEb68Gas1bRydXzVDOWN64yhZjXDZIT2hkB00rQLKcKpO'
+        'pk_live_51MePngKc5uQQJVSzl9URtVMkgVBM8hT50GIF0myNi8ZyQCPQpFcv7l3ItMd2MXhO0Lrubqw3qNEm8dT24AMUrA0G0042Tk9r8o'
       )
       var elements = stripe.elements()
       var style = {
@@ -188,16 +187,26 @@
           color: '#32325d',
         },
       }
+     
       var cardElement = elements.create('card', { style: style })
       cardElement.mount('#card-element')
       var form = document.getElementById('payment-form')
+      var buttnSubmit=document.getElementById("eventFive")
+      buttnSubmit.addEventListener("click", function () {
+        
+        //console.log("button click")
+        document.getElementById("input-submit").click()
+      })
       form.addEventListener('submit', async function (event) {
         event.preventDefault()
+        //console.log("clicked")
         const charge = await stripe.createPaymentMethod({
           type: 'card',
           card: cardElement,
         })
+        //console.log("charge :",charge)
         if (charge.error) {
+          console.log(charge.error)
           var errorElement = document.getElementById('card-errors')
           errorElement.textContent = charge.error.message
           errorElement.style.display = 'block'
@@ -206,6 +215,7 @@
         await axios
           .post('/charge', {})
           .then(async (response) => {
+            //console.log("res :",response.data)
             const { error } = await stripe.confirmCardPayment(
               response.data.clientSecret,
               {
@@ -213,18 +223,15 @@
               }
             )
             if (error) {
-              //console.log("Failed: " + error)
+              console.log("Failed: " + error)
               var errorElement = document.getElementById('card-errors')
               errorElement.textContent =
                 'Oops! Something went wrong while submitting the form.'
               errorElement.style.display = 'block'
               return
             } else {
-              var errorElement = document.getElementById('card-success')
+              console.log("payment success")
               window.location.replace('/thank-you')
-              errorElement.textContent =
-                'Thank you! Your submission has been received!'
-              errorElement.style.display = 'block'
             }
           })
           .catch((err) => {
@@ -232,7 +239,7 @@
             errorElement.textContent =
               'Oops! Something went wrong while submitting the form.'
             errorElement.style.display = 'block'
-            //console.log("Failed: " + err)
+            console.log("Failed catch: " + err)
           })
       })
     })
@@ -255,6 +262,7 @@
     window.onload = serverSideTracking("Early Access Page View", window.location.href, "4");
     var eventFive = document.getElementById("eventFive");
     eventFive.addEventListener("click", function () {
+
       serverSideTracking("Early Access Page Submit Button Click", window.location.href, "5");
       fbq("trackCustom", "Early Access Page Submit Button Click", { eventID: "5" });
     });
